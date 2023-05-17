@@ -1,0 +1,92 @@
+﻿@model crucibleBlog.Models.BlogPost
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>BlogPost</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Content" class="control-label"></label>
+                <input asp-for="Content" class="form-control" />
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreatedDate" class="control-label"></label>
+                <input asp-for="CreatedDate" class="form-control" />
+                <span asp-validation-for="CreatedDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CategoryId" class="control-label"></label>
+                <select asp-for="CategoryId" class ="form-control" asp-items="ViewBag.CategoryId"></select>
+            </div>
+            <div class="col-12 d-flex justify-content-end mt-2">
+                <button type="submit" class="btn btn-lg btn-primary rounded-pill">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+
+    <script>
+        function addTag(tagElement) {
+            let input = document.getElementById('tagInput');
+
+            if (tagElement.classList.contains('disabledTag')) {
+                input.focus();
+                return;
+            }
+
+            let tagName = tagElement.textContent;
+
+            let currentTags = input.value.split(',');
+
+            currentTags.push(tagName);
+
+            input.value = currentTags.reduce(function (inputString, currentString) {
+                if (inputString.length > 0) {
+                    return inputString + ", " + currentString.trim(); }
+                else {
+                    return currentString.trim();
+                });
+            }
+
+            input.focus();
+
+            tagElement.classList.add('disabledTag');
+        }
+    </script>
+
+    <script>
+       
+        $('tagInuput').focus(function() {
+             $('tagcloud').show(300);
+        });
+
+
+        function addTag(tagElement)
+    </script>
+
+
+
+
+}
