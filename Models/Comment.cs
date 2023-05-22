@@ -21,7 +21,6 @@ namespace crucibleBlog.Models
 
         public virtual BlogPost? BlogPost { get; set; }
 
-        [Required]
         public string? AuthorId { get; set; }
 
         public virtual BlogUser? Author { get; set; }

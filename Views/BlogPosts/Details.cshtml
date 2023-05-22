@@ -1,11 +1,17 @@
 ﻿@model crucibleBlog.Models.BlogPost
-@using X.PagedList;
+
+@using System;
 @using crucibleBlog.Enums;
 @using crucibleBlog.Services.Interfaces;
+@using Microsoft.AspNetCore.Identity;
 
 @inject IImageService _ImageService
 @inject IBlogService _BlogService
+@inject UserManager<BlogUser> _UserManager
 
+@{
+    BlogUser? blogUser = User.Identity!.IsAuthenticated ? await _UserManager.GetUserAsync(User) : new();
+}
 
 @{
     ViewData["Title"] = "Details";
@@ -67,7 +73,7 @@
                                                         </a>
                                                     </h6>
                                                     <ul class="post-meta-list">
-                                                     @*<li>@blogPost.CreatedDate.ToString("MMM dd, yyyy") </li>*@
+                                                        @*<li>@blogPost.CreatedDate.ToString("MMM dd, yyyy") </li>*@
                                                     </ul>
                                                 </div>
                                             </div>
@@ -153,77 +159,82 @@
                     <!-- Start Comment Form Area  -->
                     <div class="axil-comment-area">
 
+
                         <!-- Start Comment Respond  -->
                         @if (User.Identity!.IsAuthenticated)
                         {
                             <div class="comment-respond">
                                 <h4 class="title">Post a comment</h4>
-                                <form>
+                                <form method="post" asp-action="Create" asp-controller="Comments" id="commentForm">
+
+                                    <input type="hidden" name="BlogPostId" value="@Model.Id" />
+
                                     <div class="row row-md-10">
                                         <div class="col-12">
                                             <div class="form-group">
-                                                <label for="message">Leave a Reply</label>
-                                                <textarea id="editor" class="form-control" name=""></textarea>
+                                                <textarea id="editor" class="form-control" name="Body"></textarea>
                                             </div>
-                                        </div>+
+                                        </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-submit cerchio">
                                             <input name="submit" type="submit" id="submit" class="axil-button button-rounded" value="Post Comment">
                                         </div>
                                     </div>
+                                    @Html.ValidationSummary()
                                 </form>
                             </div>
                         }
                         else
                         {
                             <div class="axil-total-comment-post">
-                                <div class="title">
-                            <h4 class="mb--0">30+ Comments</h4>
-                            </div>
                                 <div class="add-comment-button cerchio">
-                                    <a class="axil-button button-rounded" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Details", "BlogPosts", new { id = Model.Id })" tabindex="0"><span>Login to Add Your Comment</span></a>
+                                    <a class="axil-button button-rounded text-center justify-content-center m-auto" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Details", "BlogPosts", new { id = Model.Id })" tabindex="0"><span>Login to Add Your Comment</span></a>
                                 </div>
                             </div>
                         }
-                        <!-- End Comment Respond  -->
-                        @foreach (var comment in Model.Comments)
-                        {
-                            <!-- Start Single Comment -->
-                            <li class="comment">
-                                <div class="comment-body">
-                                    <div class="single-comment">
-                                        <div class="comment-img">
-                                            <img src="~/img/DefaultUserImage.png" alt="Author Images" style="height:40px;width:40px">
-                                        </div>
-                                        <div class="comment-inner">
-                                            <h6 class="commenter">
-                                                <a class="hover-flip-item-wrapper" href="#">
-                                                    <span class="hover-flip-item">
-                                                        <span data-text="@comment.Author">@comment.Author</span>
-                                                    </span>
-                                                </a>
-                                            </h6>
-                                            <div class="comment-meta">
-                                                <div class="time-spent">@comment.CreatedDate.ToString("MMM dd, yyyy")</div>
-                                                <div class="reply-edit">
-                                                    <!-- Add reply and edit functionality if needed -->
+                        <!-- End Comment Respond -->
+                        <!-- Start Comment Area -->
+                        <div class="axil-comment-area">
+                            <h4 class="title">@Model.Comments.Count() Comment(s)</h4>
+                            <ul class="comment-list">
+                                @foreach (var comment in Model.Comments)
+                                {
+                                    <!-- Start Single Comment -->
+                                    <li class="comment">
+                                        <div class="comment-body">
+                                            <div class="single-comment">
+                                                <div class="comment-img">
+                                                    <img src="@_ImageService.ConvertByteArrayToFile(blogUser?.ImageData!,blogUser?.ImageType,(int)(DefaultImage.BlogUserImage))" alt="Author Images" style="height:40px;width:40px">
+                                                </div>
+                                                <div class="comment-inner">
+                                                    <h6 class="commenter">
+                                                        <a class="hover-flip-item-wrapper" href="#">
+                                                            <span class="hover-flip-item">
+                                                                <span data-text="@comment.Author">@comment.Author</span>
+                                                            </span>
+                                                        </a>
+                                                    </h6>
+                                                    <div class="comment-meta">
+                                                        <div class="time-spent">@comment.CreatedDate.ToString("MMM dd, yyyy")</div>
+                                                        <div class="reply-edit">
+                                                            <!-- Add reply and edit functionality if needed -->
+                                                        </div>
+                                                    </div>
+                                                    <div class="comment-text">
+                                                        <p class="b2">
+                                                            @Html.Raw(comment.Body)
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="comment-text">
-                                                <p class="b2">
-                                                    @comment.Body
-                                                </p>
-                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- End Single Comment -->
-                        }
+                                    </li>
+                                    <!-- End Single Comment -->
+                                }
                             </ul>
                         </div>
-                        <!-- End Comment Area  -->
+                        <!-- End Comment Area -->
                     </div>
                     <!-- End Comment Form Area  -->
 
@@ -296,6 +307,10 @@
             <h2>Category</h2>
             <p>@Model.CategoryId</p>
         </div>
+
+
+
+
     </div>
     <div class="col-lg-4">
         <div class="form-group">
@@ -338,7 +353,9 @@
                                         </a>
                                     </h6>
                                     <div class="comment-meta">
-                                        <div class="time-spent">@comment.CreatedDate.ToString("MMM dd, yyyy")</div>
+                                        <div class="time-spent">
+                                            
+                                        @comment.CreatedDate.ToString("MMM dd, yyyy")</div>
                                         <div class="reply-edit">
                                             <!-- Add reply and edit functionality if needed -->
                                         </div>

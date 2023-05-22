@@ -604,11 +604,37 @@
                                 </div>
                             </form>
                         </div>
+                     <nav class="navbar navbar-expand-sm navbar-toggleable-sm box-shadow mb-3">
+                       <div class="container-fluid">
                         <ul class="metabar-block">
-                            <li class="icon"><a href="#"><i class="fas fa-bookmark"></i></a></li>
-                            <li class="icon"><a href="#"><i class="fas fa-bell"></i></a></li>
                             <li><a href="#"><img src="assets/images/others/author.png" alt="Author Images"></a></li>
+                                <li class="nav-item dropdown has-arrow main-drop">
+                                    <a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="user-img">
+                                            <img src="" alt="">
+                                            <span class="status online"></span>
+                                        </span>
+                                        <span class="text-start">Account</span>
+                                    </a>
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        <div class="dropdown-menu animate__slideInDown">
+                                            <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index"><p style="color:black">My Profile</p></a>
+                                            <a class="dropdown-item" href="javascript:document.getElementById('logoutForm').submit();"><p style="color:black">Logout</p></a>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="dropdown-menu animate__slideInDown">
+                                            <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login"><p style="color:black">Sign In</p></a>
+                                            <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register"><p style="color:black">Register</p></a>
+                                        </div>
+                                    }
+                                </li>
                         </ul>
+                    </div>
+                    </nav>
+
                         <!-- Start Hamburger Menu  -->
                         <div class="hamburger-menu d-block d-xl-none">
                             <div class="hamburger-inner">

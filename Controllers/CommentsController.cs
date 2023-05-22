@@ -65,8 +65,13 @@ namespace crucibleBlog.Controllers
             {
                 _context.Add(comment);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                BlogPost blogPost = await _context.BlogPost.FirstOrDefaultAsync(b => b.Id == comment.BlogPostId);
+                return RedirectToAction("Details", "BlogPosts", new { slug = blogPost!.Slug });
             }
+
+            comment.CreatedDate = DateTime.UtcNow;
+
             ViewData["AuthorId"] = new SelectList(_context.BlogUsers, "Id", "Id", comment.AuthorId);
             ViewData["BlogPostId"] = new SelectList(_context.BlogPost, "Id", "Content", comment.BlogPostId);
             return View(comment);

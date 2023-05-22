@@ -53,11 +53,11 @@
 				</div>
 			</div>
 			<div class="col-12 col-lg-8">
-				<div class="form-group">
-					<label asp-for="Content" id="editor" class="control-label "></label>
-					<textarea asp-for="Content" class="editor form-control" name=""></textarea>
+				<div class="form-group" id="editor">
+					<label asp-for="Content" class="control-label"></label>
+					<textarea asp-for="Content" class="editor form-control"></textarea>
 					<span asp-validation-for="Content" class="text-danger"></span>
-				</div>
+				</div>	
 				<div class="form-group" id="tagContainer">
 					<label asp-for="Tags"></label>
 					<input class="form-control" type="text" id="tagInput" name="StringTags" autocomplete="off" />
@@ -94,70 +94,70 @@
 			});;
 	</script>
 
-<script>
-	$(document).ready(function () {
-		document.getElementById('tagInput').addEventListener('focus', () => {
+	<script>
+		$(document).ready(function () {
+			document.getElementById('tagInput').addEventListener('focus', () => {
 
-		})
-
-		$('#tagInput').focus(function () {
-			$('.tagcloud').show(300);
-		});
-
-		$('form *:not("#tagInput")').focus(function () {
-			if ($('.tagcloud').is(':visible')) {
-				$('.tagcloud').hide(300);
-			}
-		})
-
-		$('#tagInput').keyup(function () {
-
-			$('.disabledTag').each(function () {
-				$(this).removeClass('disabledTag')
 			})
 
-			//get the text they're searching with
-			let inputText = $('#tagInput').val();
-			let inputTags = inputText.split(',');
-			let searchString = inputTags.pop().trim();
+			$('#tagInput').focus(function () {
+				$('.tagcloud').show(300);
+			});
 
-			//hide all the tags that dont contain that text
-			$('.tagcloud > a:contains(' + searchString + ')').show();
-			$('.tagcloud > a:not( :contains(' + searchString + ') )').hide();
-
-			inputTags.forEach(tag => {
-				if (tag.trim() == '') return;
-
-				let tagElement = $('.tagcloud > a:contains(' + tag.trim() + ')');
-
-				if (tagElement.text().trim().toLowerCase() == tag.trim().toLowerCase()) {
-					tagElement.addClass('disabledTag');
+			$('form *:not("#tagInput")').focus(function () {
+				if ($('.tagcloud').is(':visible')) {
+					$('.tagcloud').hide(300);
 				}
 			})
+
+			$('#tagInput').keyup(function () {
+
+				$('.disabledTag').each(function () {
+					$(this).removeClass('disabledTag')
+				})
+
+				//get the text they're searching with
+				let inputText = $('#tagInput').val();
+				let inputTags = inputText.split(',');
+				let searchString = inputTags.pop().trim();
+
+				//hide all the tags that dont contain that text
+				$('.tagcloud > a:contains(' + searchString + ')').show();
+				$('.tagcloud > a:not( :contains(' + searchString + ') )').hide();
+
+				inputTags.forEach(tag => {
+					if (tag.trim() == '') return;
+
+					let tagElement = $('.tagcloud > a:contains(' + tag.trim() + ')');
+
+					if (tagElement.text().trim().toLowerCase() == tag.trim().toLowerCase()) {
+						tagElement.addClass('disabledTag');
+					}
+				})
+			});
+
 		});
+		function addTag(tagElement) {
+			let input = document.getElementById('tagInput');
 
-	});
-	function addTag(tagElement) {
-		let input = document.getElementById('tagInput');
+			if (tagElement.classlist.contains('disabledTag')) {
+				input.focus();
+				return;
+			}
 
-		if (tagElement.classlist.contains('disabledTag')) {
+			let tagName = tagElement.textContent + ', ';
+
+			let currentTags = input.value.split(',');
+
+			currentTags.pop();
+			currentTags.push(tagName);
+
+			input.value = currentTags.reduce((inputString, currentString) => inputString + ", " + currentString.trim());
+
 			input.focus();
-			return;
+
+			$('.tagcloud > a').show();
+			tagElement.classList.add('disabledTag');
 		}
-
-		let tagName = tagElement.textContent + ', ';
-
-		let currentTags = input.value.split(',');
-
-		currentTags.pop();
-		currentTags.push(tagName);
-
-		input.value = currentTags.reduce((inputString, currentString) => inputString + ", " + currentString.trim());
-
-		input.focus();
-
-		$('.tagcloud > a').show();
-		tagElement.classList.add('disabledTag');
-	}
-</script>
+	</script>
 }
