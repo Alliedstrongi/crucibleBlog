@@ -24,7 +24,6 @@ namespace crucibleBlog.Models
 
 
         public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
-		public string Slug { get; internal set; }
 		public string? Title { get; internal set; }
 	}
 }

@@ -2,9 +2,7 @@ using crucibleBlog.Controllers;
 using crucibleBlog.Data;
 using crucibleBlog.Models;
 using crucibleBlog.Services.Interfaces;
-using crucibleBlog.Services.Services;
-using crucibleBlog.Services.Services.Interfaces;
-using CrucibleBlog.Services;
+using crucibleBlog.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -62,7 +60,7 @@ app.MapControllerRoute(
     name: "custom",
     pattern: "Content/{slug}",
     defaults: new { controller = "BlogPosts", action = "Details" }
-    ); ; 
+    );  
 
 app.MapControllerRoute(
     name: "default",

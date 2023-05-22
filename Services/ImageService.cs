@@ -1,13 +1,16 @@
 ﻿using System.Linq.Expressions;
 using crucibleBlog.Services.Interfaces;
 
-namespace crucibleBlog.Services.Services
+namespace crucibleBlog.Services
 {
     public class ImageService : IImageService
     {
-        private readonly string? _defaultUserImage = "/img/DefaultUserImage.jpg";
-        private readonly string? _defaultBlogImage = "/img/DefaultBlogImage.jpg";
-        private readonly string? _defaultCategoryImage = "/img/DefaultCategoryImage.jpg";
+
+
+        private readonly string? _defaultUserImage = "";
+        private readonly string? _defaultBlogImage = "/img/Blog/Blog_CodeTag.jpg";
+        private readonly string? _defaultCategoryImage = "/img/DefaultContactImage.png";
+        //Set up default blog and default Category and default 
 
         public string? ConvertByteArrayToFile(byte[]? fileData, string? extension, int defaultImage)
         {
@@ -15,33 +18,30 @@ namespace crucibleBlog.Services.Services
             {
                 switch (defaultImage)
                 {
+                    //Return the Defualt User Image if the value is 1
                     case 1: return _defaultUserImage;
+                    //Return the Defualt Blog Image if the value is 2
                     case 2: return _defaultBlogImage;
+                    //Return the Defualt Category Image if the value is 3
                     case 3: return _defaultCategoryImage;
                 }
             }
-
             try
             {
-                string? imageBase64Data = Convert.ToBase64String(fileData!);
+                string? imageBase64Data = Convert.ToBase64String(fileData);
                 imageBase64Data = string.Format($"data:{extension};base64,{imageBase64Data}");
 
                 return imageBase64Data;
-
             }
             catch (Exception)
+
             {
                 throw;
             }
 
         }
 
-		public string? ConvertByteArrayToFile(byte[] fileData, string? extension)
-		{
-			throw new NotImplementedException();
-		}
-
-		public async Task<byte[]> ConvertFileToByteArrayAsync(IFormFile? file)
+        public async Task<byte[]> ConvertFileToByteArrayAsync(IFormFile? file)
         {
             try
             {
@@ -52,9 +52,9 @@ namespace crucibleBlog.Services.Services
 
                 return byteFile;
             }
-
             catch (Exception)
             {
+
                 throw;
             }
         }

@@ -10,87 +10,87 @@ using crucibleBlog.Models;
 
 namespace crucibleBlog.Controllers
 {
-    public class CategoriesController : Controller
+    public class TagsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public CategoriesController(ApplicationDbContext context)
+        public TagsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Categories
+        // GET: Tags
         public async Task<IActionResult> Index()
         {
-            return _context.Categories != null ?
-                        View(await _context.Categories.ToListAsync()) :
-                        Problem("Entity set 'ApplicationDbContext.Categories'  is null.");
+              return _context.Tags != null ? 
+                          View(await _context.Tags.ToListAsync()) :
+                          Problem("Entity set 'ApplicationDbContext.Tags'  is null.");
         }
 
-        // GET: Categories/Details/5
+        // GET: Tags/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Categories == null)
+            if (id == null || _context.Tags == null)
             {
                 return NotFound();
             }
 
-            var category = await _context.Categories
+            var tag = await _context.Tags
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (category == null)
+            if (tag == null)
             {
                 return NotFound();
             }
 
-            return View(category);
+            return View(tag);
         }
 
-        // GET: Categories/Create
+        // GET: Tags/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Categories/Create
+        // POST: Tags/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,ImageData,ImageType")] Category category)
+        public async Task<IActionResult> Create([Bind("Id,Name")] Tag tag)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(category);
+                _context.Add(tag);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(category);
+            return View(tag);
         }
 
-        // GET: Categories/Edit/5
+        // GET: Tags/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Categories == null)
+            if (id == null || _context.Tags == null)
             {
                 return NotFound();
             }
 
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
+            var tag = await _context.Tags.FindAsync(id);
+            if (tag == null)
             {
                 return NotFound();
             }
-            return View(category);
+            return View(tag);
         }
 
-        // POST: Categories/Edit/5
+        // POST: Tags/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,ImageData,ImageType")] Category category)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Tag tag)
         {
-            if (id != category.Id)
+            if (id != tag.Id)
             {
                 return NotFound();
             }
@@ -99,12 +99,12 @@ namespace crucibleBlog.Controllers
             {
                 try
                 {
-                    _context.Update(category);
+                    _context.Update(tag);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CategoryExists(category.Id))
+                    if (!TagExists(tag.Id))
                     {
                         return NotFound();
                     }
@@ -115,49 +115,49 @@ namespace crucibleBlog.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(category);
+            return View(tag);
         }
 
-        // GET: Categories/Delete/5
+        // GET: Tags/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Categories == null)
+            if (id == null || _context.Tags == null)
             {
                 return NotFound();
             }
 
-            var category = await _context.Categories
+            var tag = await _context.Tags
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (category == null)
+            if (tag == null)
             {
                 return NotFound();
             }
 
-            return View(category);
+            return View(tag);
         }
 
-        // POST: Categories/Delete/5
+        // POST: Tags/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Categories == null)
+            if (_context.Tags == null)
             {
-                return Problem("Entity set 'ApplicationDbContext.Categories'  is null.");
+                return Problem("Entity set 'ApplicationDbContext.Tags'  is null.");
             }
-            var category = await _context.Categories.FindAsync(id);
-            if (category != null)
+            var tag = await _context.Tags.FindAsync(id);
+            if (tag != null)
             {
-                _context.Categories.Remove(category);
+                _context.Tags.Remove(tag);
             }
-
+            
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CategoryExists(int id)
+        private bool TagExists(int id)
         {
-            return (_context.Categories?.Any(e => e.Id == id)).GetValueOrDefault();
+          return (_context.Tags?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

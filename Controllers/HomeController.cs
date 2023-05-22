@@ -11,7 +11,7 @@ namespace crucibleBlog.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
-        private readonly TBlogService _blogService;
+       // private readonly TBlogService _blogService;
 
         public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
         {
@@ -34,7 +34,7 @@ namespace crucibleBlog.Controllers
 			int pageSize = 3;
 			int page = pageNum ?? 1;
 
-			IPagedList<BlogPost> blogPosts = await _blogService.SearchBlogPosts(searchString).ToPagedListAsync(page, pageSize);
+		//	IPagedList<BlogPost> blogPosts = await _blogService.SearchBlogPosts(searchString).ToPagedListAsync(page, pageSize);
 
 			return View();
 

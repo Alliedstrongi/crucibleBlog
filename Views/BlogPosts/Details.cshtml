@@ -1,90 +1,364 @@
 ﻿@model crucibleBlog.Models.BlogPost
+@using X.PagedList;
+@using crucibleBlog.Enums;
+@using crucibleBlog.Services.Interfaces;
+
+@inject IImageService _ImageService
+@inject IBlogService _BlogService
+
 
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<style>
+    .ck-editor__editable_inline {
+        min-height: 300px;
+    }
 
-<div>
-    <h4>BlogPost</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Abstract)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Abstract)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Content)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Content)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Slug)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Slug)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsPublished)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsPublished)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageData)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageData)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageType)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category!.Name)
-        </dd>
-    </dl>
+    .image-wrapper {
+        float: none;
+        margin-right: 20px;
+    }
+
+        .image-wrapper img {
+            max-width: 100%;
+            max-height: 350px;
+        }
+</style>
+<!-- Start Post Single Wrapper  -->
+<div class="post-single-wrapper axil-section-gap bg-color-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <!-- Start Banner Area -->
+                <div class="banner banner-single-post post-formate post-layout pb--40">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <!-- Start Single Slide  -->
+                                <div class="content-block">
+                                    <!-- Start Post Content  -->
+                                    <div class="post-content">
+                                        <div class="post-cat">
+                                            <div class="post-cat-list">
+                                                <a class="hover-flip-item-wrapper" href="#">
+                                                    <span class="hover-flip-item">
+                                                        <span data-text="@Model.CategoryId">@Model.CategoryId</span>
+                                                    </span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <h1 class="title">
+                                            @Model.Title
+                                        </h1>
+                                        <!-- Post Meta  -->
+                                        <div class="post-meta-wrapper">
+                                            <div class="post-meta">
+                                                <div class="post-author-avatar border-rounded">
+                                                    <img src="/img/pictures/6D8B0521-88C4-4259-B52D-B52D3B5388AB.jpg" alt="Author Images" class="img-flex text-start" style="height:80px;width:80px">
+                                                </div>
+                                                <div class="content">
+                                                    <h6 class="post-author-name">
+                                                        <a class="hover-flip-item-wrapper" href="author.html">
+                                                            <span class="hover-flip-item">
+                                                                <span data-text="Dylan Taylor">Dylan Taylor</span>
+                                                            </span>
+                                                        </a>
+                                                    </h6>
+                                                    <ul class="post-meta-list">
+                                                     @*<li>@blogPost.CreatedDate.ToString("MMM dd, yyyy") </li>*@
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <ul class="social-share-transparent justify-content-end">
+                                                <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                                                <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+                                                <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                                                <li><a href="#"><i class="fas fa-link"></i></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- End Post Content  -->
+                                </div>
+                                <!-- End Single Slide  -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Banner Area -->
+                <!-- Start Blog Details  -->
+                <div class="axil-post-details">
+                    <p class="has-medium-font-size">
+                        @Model.Abstract
+                    </p>
+                    <figure class="wp-block-image alignwide text-center">
+                        <div class="image-wrapper">
+                            <img src="@_ImageService.ConvertByteArrayToFile(Model.ImageData!, Model.ImageType!, (int)DefaultImage.BlogPostImage)" alt="Blog Post Image">
+                        </div>
+                    </figure>
+                    @Model.Content
+                    <div class="tagcloud">
+                        @foreach (Tag tag in Model.Tags)
+                        {
+                            <p>@tag.Name</p>
+                        }
+                    </div>
+                    <div class="social-share-block">
+                        <div class="post-like">
+                            <a href="#"><i class="fa-solid fa-thumbs-up"></i><span>2.2k Like</span></a>
+                        </div>
+                        <ul class="social-icon icon-rounded-transparent md-size">
+                            <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                            <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+                            <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                            <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
+                        </ul>
+                    </div>
+                    <!-- Start Author  -->
+                    <div class="about-author">
+                        <div class="media">
+                            <div class="thumbnail">
+                                <a href="#">
+                                    <img src="/img/pictures/6D8B0521-88C4-4259-B52D-B52D3B5388AB.jpg" alt="Author Images" class="img-flex text-start" style="height:120px;width:120px">
+                                </a>
+                            </div>
+                            <div class="media-body">
+                                <div class="author-info">
+                                    <h5 class="title">
+                                        <a class="hover-flip-item-wrapper" href="#">
+                                            <span class="hover-flip-item">
+                                                <span data-text="Dylan Taylor">Dylan Taylor</span>
+                                            </span>
+                                        </a>
+                                    </h5>
+                                    <span class="b3 subtitle">Software Developer</span>
+                                </div>
+                                <div class="content">
+                                    <p class="b1 description">
+                                        Being new to the web development field, I aspire to learn everything I can and to improve my skills with every passing day.
+                                    </p>
+                                    <ul class="social-share-transparent size-md">
+                                        <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                                        <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+                                        <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                                        <li><a href="#"><i class="far fa-envelope"></i></a></li>
+                                        <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Author  -->
+                    <!-- Start Comment Form Area  -->
+                    <div class="axil-comment-area">
+
+                        <!-- Start Comment Respond  -->
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <div class="comment-respond">
+                                <h4 class="title">Post a comment</h4>
+                                <form>
+                                    <div class="row row-md-10">
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label for="message">Leave a Reply</label>
+                                                <textarea id="editor" class="form-control" name=""></textarea>
+                                            </div>
+                                        </div>+
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-submit cerchio">
+                                            <input name="submit" type="submit" id="submit" class="axil-button button-rounded" value="Post Comment">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="axil-total-comment-post">
+                                <div class="title">
+                            <h4 class="mb--0">30+ Comments</h4>
+                            </div>
+                                <div class="add-comment-button cerchio">
+                                    <a class="axil-button button-rounded" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Details", "BlogPosts", new { id = Model.Id })" tabindex="0"><span>Login to Add Your Comment</span></a>
+                                </div>
+                            </div>
+                        }
+                        <!-- End Comment Respond  -->
+                        @foreach (var comment in Model.Comments)
+                        {
+                            <!-- Start Single Comment -->
+                            <li class="comment">
+                                <div class="comment-body">
+                                    <div class="single-comment">
+                                        <div class="comment-img">
+                                            <img src="~/img/DefaultUserImage.png" alt="Author Images" style="height:40px;width:40px">
+                                        </div>
+                                        <div class="comment-inner">
+                                            <h6 class="commenter">
+                                                <a class="hover-flip-item-wrapper" href="#">
+                                                    <span class="hover-flip-item">
+                                                        <span data-text="@comment.Author">@comment.Author</span>
+                                                    </span>
+                                                </a>
+                                            </h6>
+                                            <div class="comment-meta">
+                                                <div class="time-spent">@comment.CreatedDate.ToString("MMM dd, yyyy")</div>
+                                                <div class="reply-edit">
+                                                    <!-- Add reply and edit functionality if needed -->
+                                                </div>
+                                            </div>
+                                            <div class="comment-text">
+                                                <p class="b2">
+                                                    @comment.Body
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <!-- End Single Comment -->
+                        }
+                            </ul>
+                        </div>
+                        <!-- End Comment Area  -->
+                    </div>
+                    <!-- End Comment Form Area  -->
+
+                </div>
+                <!-- End Blog Details  -->
+            </div>
+        </div>
+    </div>
 </div>
-        @foreach (Tag tag in Model.Tags)
-            {
-            <p>
-                @tag.Name
-            </p>
+
+<!-- End Post Single Wrapper  -->
+@section scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <!--CK Editor-->
+    <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
+    <script>
+        ClassicEditor
+            .create(document.querySelector('#editor'), {
+                licenseKey: '',
+            })
+            .then(editor => {
+                window.editor = editor;
+            });;
+    </script>
 }
+
+@* <style>
+    .image-wrapper {
+        float: center;
+        margin-right: 20px;
+    }
+
+        .image-wrapper img {
+            max-width: 100%;
+            max-height: 350px;
+        }
+
+    .title {
+        font-size: 24px;
+        color: #16325C;
+        margin-bottom: 10px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+</style>
+
+<h1 class="title text-center justify-content-center">@Model.Title</h1>
+
+<div class="row text-center justify-content-center">
+    <div class="col-12">
+        <div class="image-wrapper">
+            <img src="@_ImageService.ConvertByteArrayToFile(Model.ImageData!, Model.ImageType!, (int)DefaultImage.BlogPostImage)" alt="Blog Post Image">
+        </div>
+    </div>
+</div>
+
+<div class="row text-center justify-content-center mt-4">
+    <div class="col-lg-4">
+        <div class="form-group">
+            <h2>Abstract</h2>
+            <p>@Model.Abstract</p>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="form-group">
+            <h2>Category</h2>
+            <p>@Model.CategoryId</p>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="form-group">
+            <h2>Tags</h2>
+            @foreach (Tag tag in Model.Tags)
+            {
+                <p>@tag.Name</p>
+            }
+        </div>
+    </div>
+</div>
+<div class="row justify-content-center text-center mt-4">
+    <div class="col-lg-12">
+        <div class="form-group">
+            <h2>Content</h2>
+            <p>@Model.Content</p>
+        </div>
+    </div>
+</div>
+<div class="row text-center justify-content-center">
+    <div class="col-12">
+        <div class="axil-comment-area justify-content-center text-center">
+            <h2>Comments (@Model.Comments.Count() Comment(s))</h2>
+            <ul class="comment-list">
+                @foreach (var comment in Model.Comments)
+                {
+                    <!-- Start Single Comment -->
+                    <li class="comment">
+                        <div class="comment-body">
+                            <div class="single-comment">
+                                <div class="comment-img">
+                                    <img src="~/img/DefaultUserImage.png" alt="Author Images" style="height:40px;width:40px">
+                                </div>
+                                <div class="comment-inner">
+                                    <h6 class="commenter">
+                                        <a class="hover-flip-item-wrapper" href="#">
+                                            <span class="hover-flip-item">
+                                                <span data-text="@comment.Author">@comment.Author</span>
+                                            </span>
+                                        </a>
+                                    </h6>
+                                    <div class="comment-meta">
+                                        <div class="time-spent">@comment.CreatedDate.ToString("MMM dd, yyyy")</div>
+                                        <div class="reply-edit">
+                                            <!-- Add reply and edit functionality if needed -->
+                                        </div>
+                                    </div>
+                                    <div class="comment-text">
+                                        <p class="b2">
+                                            @comment.Body
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <!-- End Single Comment -->
+                }
+            </ul>
+            </div>
+        </div>
+    </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
-</div>
+</div> *@

@@ -25,7 +25,8 @@ namespace crucibleBlog.Models
         public string? AuthorId { get; set; }
 
         public virtual BlogUser? Author { get; set; }
-    }
+		public DateTime CreatedDate { get; internal set; }
+	}
 }
 
 
