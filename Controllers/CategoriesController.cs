@@ -7,17 +7,20 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using crucibleBlog.Data;
 using crucibleBlog.Models;
+using crucibleBlog.Services.Interfaces;
 
 namespace crucibleBlog.Controllers
 {
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
+		private readonly IImageService _imageService;
 
-        public CategoriesController(ApplicationDbContext context)
+		public CategoriesController(ApplicationDbContext context, IImageService imageService)
         {
             _context = context;
-        }
+			_imageService = imageService;
+		}
 
         // GET: Categories
         public async Task<IActionResult> Index()
@@ -60,7 +63,13 @@ namespace crucibleBlog.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(category);
+                if (category.ImageFile != null)
+                {
+					category.ImageData = await _imageService.ConvertFileToByteArrayAsync(category.ImageFile);
+					category.ImageType = category.ImageFile.ContentType;
+                }
+
+				_context.Add(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }

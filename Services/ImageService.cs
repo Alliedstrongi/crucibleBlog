@@ -9,7 +9,7 @@ namespace crucibleBlog.Services
 
         private readonly string? _defaultUserImage = "/img/Default.jpg";
         private readonly string? _defaultBlogImage = "/img/Blog/Blog_CodeTag.jpg";
-        private readonly string? _defaultCategoryImage = "/img/DefaultContactImage.png";
+        private readonly string? _defaultCategoryImage = "/img/Default.png";
         //Set up default blog and default Category and default 
 
         public string? ConvertByteArrayToFile(byte[]? fileData, string? extension, int defaultImage)

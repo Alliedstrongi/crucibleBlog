@@ -23,6 +23,11 @@
 	label.form-check-label {
 		font-size: 22px;
 	}
+
+	
+	.tag:hover {
+		cursor: pointer;
+	}
 </style>
 
 <main class="container mt-5">
@@ -53,15 +58,21 @@
 				</div>
 			</div>
 			<div class="col-12 col-lg-8">
-				<div class="form-group" id="editor">
+				<div class="form-group">
 					<label asp-for="Content" class="control-label"></label>
 					<textarea asp-for="Content" class="editor form-control"></textarea>
 					<span asp-validation-for="Content" class="text-danger"></span>
 				</div>	
 				<div class="form-group" id="tagContainer">
-					<label asp-for="Tags"></label>
-					<input class="form-control" type="text" id="tagInput" name="StringTags" autocomplete="off" />
-				</div>
+					<label asp-for="Tags"></label> 
+					<input class="form-control" type="text" id="tagInput" name="StringTags" autocomplete="off" value="@ViewBag.Tags" /> 
+					<div class="tagcloud axil-single-widget mt-2" style="display:none">
+
+						@foreach (Tag tag in await _BlogService.GetTagsAsync())
+						{
+							<a class="tag" onclick="addTag(this)">@tag.Name</a>
+						}
+					</div>
 			</div>
 		</div>
 		<div class="form-group d-flex justify-content-end mt-3">
@@ -140,10 +151,10 @@
 		function addTag(tagElement) {
 			let input = document.getElementById('tagInput');
 
-			if (tagElement.classlist.contains('disabledTag')) {
+			if (tagElement.classList.contains('disabledTag')) {
 				input.focus();
 				return;
-			}
+			};
 
 			let tagName = tagElement.textContent + ', ';
 

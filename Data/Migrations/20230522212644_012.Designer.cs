@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using crucibleBlog.Data;
@@ -11,9 +12,11 @@ using crucibleBlog.Data;
 namespace crucibleBlog.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230522212644_012")]
+    partial class _012
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace crucibleBlog.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("BlogPostTag", b =>
-                {
-                    b.Property<int>("BlogPostsId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TagsId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("BlogPostsId", "TagsId");
-
-                    b.HasIndex("TagsId");
-
-                    b.ToTable("BlogPostTag");
-                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -167,33 +155,6 @@ namespace crucibleBlog.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("crucibleBlog.Models.BlogLike", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BlogPostId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("BlogUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsLiked")
-                        .HasColumnType("boolean");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BlogPostId");
-
-                    b.HasIndex("BlogUserId");
-
-                    b.ToTable("BlogLikes");
                 });
 
             modelBuilder.Entity("crucibleBlog.Models.BlogPost", b =>
@@ -408,6 +369,12 @@ namespace crucibleBlog.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("BlogPostId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("BlogPostId1")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -415,22 +382,11 @@ namespace crucibleBlog.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BlogPostId");
+
+                    b.HasIndex("BlogPostId1");
+
                     b.ToTable("Tags");
-                });
-
-            modelBuilder.Entity("BlogPostTag", b =>
-                {
-                    b.HasOne("crucibleBlog.Models.BlogPost", null)
-                        .WithMany()
-                        .HasForeignKey("BlogPostsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crucibleBlog.Models.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -484,25 +440,6 @@ namespace crucibleBlog.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("crucibleBlog.Models.BlogLike", b =>
-                {
-                    b.HasOne("crucibleBlog.Models.BlogPost", "BlogPost")
-                        .WithMany("Likes")
-                        .HasForeignKey("BlogPostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("crucibleBlog.Models.BlogUser", "BlogUser")
-                        .WithMany("BlogLikes")
-                        .HasForeignKey("BlogUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BlogPost");
-
-                    b.Navigation("BlogUser");
-                });
-
             modelBuilder.Entity("crucibleBlog.Models.BlogPost", b =>
                 {
                     b.HasOne("crucibleBlog.Models.Category", "Category")
@@ -531,17 +468,28 @@ namespace crucibleBlog.Data.Migrations
                     b.Navigation("BlogPost");
                 });
 
+            modelBuilder.Entity("crucibleBlog.Models.Tag", b =>
+                {
+                    b.HasOne("crucibleBlog.Models.BlogPost", null)
+                        .WithMany("Tags")
+                        .HasForeignKey("BlogPostId");
+
+                    b.HasOne("crucibleBlog.Models.Category", "BlogPost")
+                        .WithMany()
+                        .HasForeignKey("BlogPostId1");
+
+                    b.Navigation("BlogPost");
+                });
+
             modelBuilder.Entity("crucibleBlog.Models.BlogPost", b =>
                 {
                     b.Navigation("Comments");
 
-                    b.Navigation("Likes");
+                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("crucibleBlog.Models.BlogUser", b =>
                 {
-                    b.Navigation("BlogLikes");
-
                     b.Navigation("Comments");
                 });
 

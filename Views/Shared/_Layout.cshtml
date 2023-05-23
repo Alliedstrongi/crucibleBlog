@@ -72,17 +72,12 @@
                         <nav class="mainmenu-nav">
                             <!-- Start Mainmanu Nav -->
                             <ul class="mainmenu">
-                                <li class="menu-item-has-children">
-                                    <a href="#">Home</a>
-                                    <ul class="axil-submenu">
-                                        <li>
-                                            <a class="hover-flip-item-wrapper" asp-area="" asp-controller="Home" asp-action="Index">
-                                                <span class="hover-flip-item">
-                                                    <span data-text="Home Default">Home Default</span>
-                                                </span>
-                                            </a>
-                                        </li>
-                                    </ul>
+                                <li>
+                                        <a asp-area="" asp-controller="Home" asp-action="Index">
+                                            <span>
+                                                <span data-text="Home Default">Home Default</span>
+                                            </span>
+                                        </a>
                                 </li>
 
                                 <li class="menu-item-has-children">
@@ -95,21 +90,23 @@
                                                 </span>
                                             </a>
                                         </li>
-                                    </ul>
-                                </li>
-
-                                <li class="menu-item-has-children">
-                                    <a href="#">Categories</a>
-                                    <ul class="axil-submenu">
+                                            <li>
+                                                <a class="hover-flip-item-wrapper" asp-area="" asp-controller="Categories" asp-action="Index">
+                                                    <span class="hover-flip-item">
+                                                        <span data-text="Admin Categories">Admin Categories</span>
+                                                    </span>
+                                                </a>
+                                            </li>
                                         <li>
-                                            <a class="hover-flip-item-wrapper" asp-area="" asp-controller="Categories" asp-action="Index">
-                                                <span class="hover-flip-item">
-                                                    <span data-text="Admin Categories">Admin Categories</span>
-                                                </span>
-                                            </a>
+                                                <a class="hover-flip-item-wrapper" asp-area="" asp-controller="Tags" asp-action="Index">
+                                                    <span class="hover-flip-item">
+                                                        <span data-text="Admin Tags">Admin Tags</span>
+                                                    </span>
+                                                </a>
                                         </li>
                                     </ul>
                                 </li>
+
 
                                 <li class="menu-item-has-children megamenu-wrapper">
                                     <a href="#">Quick Menu</a>
@@ -607,11 +604,10 @@
                      <nav class="navbar navbar-expand-sm navbar-toggleable-sm box-shadow mb-3">
                        <div class="container-fluid">
                         <ul class="metabar-block">
-                            <li><a href="#"><img src="assets/images/others/author.png" alt="Author Images"></a></li>
                                 <li class="nav-item dropdown has-arrow main-drop">
-                                    <a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a href="#" class="dropdown-toggle nav-link justify-content-center align-content-center" data-bs-toggle="dropdown" aria-expanded="false">
                                         <span class="user-img">
-                                            <img src="" alt="">
+                                                    <img src="/img/Default.jpg" alt="Author Images">
                                             <span class="status online"></span>
                                         </span>
                                         <span class="text-start">Account</span>
@@ -737,37 +733,16 @@
                             </div>
                             <ul class="mainmenu justify-content-start">
                                 <li>
-                                    <a class="hover-flip-item-wrapper" href="#">
+                                    <a class="hover-flip-item-wrapper" asp-area="" asp-controller="Home" asp-action="Contact">
                                         <span class="hover-flip-item">
-                                            <span data-text="Contact Us">Contact Us</span>
+                                            <span data-text="Contact Me">Contact Me</span>
                                         </span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="hover-flip-item-wrapper" href="#">
+                                    <a class="hover-flip-item-wrapper" href="https://dylantaylor-portfolio.netlify.app">
                                         <span class="hover-flip-item">
-                                            <span data-text="Terms of Use">Terms of Use</span>
-                                        </span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="hover-flip-item-wrapper" href="#">
-                                        <span class="hover-flip-item">
-                                            <span data-text="AdChoices">AdChoices</span>
-                                        </span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="hover-flip-item-wrapper" href="#">
-                                        <span class="hover-flip-item">
-                                            <span data-text="Advertise with Us">Advertise with Us</span>
-                                        </span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="hover-flip-item-wrapper" href="#">
-                                        <span class="hover-flip-item">
-                                            <span data-text="Blogar Store">Blogar Store</span>
+                                            <span data-text="See More of my Work">See More of my Work</span>
                                         </span>
                                     </a>
                                 </li>
@@ -776,7 +751,7 @@
                     </div>
                     <div class="col-lg-3 col-md-12">
                         <div class="copyright-right text-start text-lg-end mt_md--20 mt_sm--20">
-                            <p class="b3">All Rights Reserved © 2022</p>
+                            <p class="b3">All Rights Reserved © 2023</p>
                         </div>
                     </div>
                 </div>

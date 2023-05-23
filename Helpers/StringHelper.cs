@@ -23,11 +23,11 @@ namespace crucibleBlog.Helpers
 			return output;
 		}
 
-		public static string RemoveAccents(string? title)
+		private static string RemoveAccents(string? title)
 		{
 			if (string.IsNullOrWhiteSpace(title))
 			{
-				return title;
+				return title!;
 			}
 
 			// Convert for Unicode

@@ -35,7 +35,7 @@ namespace crucibleBlog.Services
                 {
                     if (string.IsNullOrWhiteSpace(tagName)) continue;
 
-                    Tag? tag = await _context.Tags.FirstOrDefaultAsync(t => t.Name!.Trim() == tagName.Trim().ToLower());
+                    Tag? tag = await _context.Tags.FirstOrDefaultAsync(t => t.Name!.Trim().ToLower() == tagName.Trim().ToLower());
 
                     if (tag == null)
                     {
@@ -125,8 +125,7 @@ namespace crucibleBlog.Services
         {
             try
             {
-                BlogPost? blogPost = await _context.BlogPost.Include(b=>b.Tags)
-                                                            .FirstOrDefaultAsync(b=>b.Id == blogPostId);
+                BlogPost? blogPost = await _context.BlogPost.Include(b => b.Tags).FirstOrDefaultAsync(b => b.Id == blogPostId);
 
                 if (blogPost == null) return;
 
@@ -184,49 +183,93 @@ namespace crucibleBlog.Services
             }
         }
 
-		public async Task<bool> ValidSlugAsync(string? title, int? blogPostId)
-		{
-			try
-			{
-				string? newSlug = StringHelper.BlogPostSlug(title);
+        public async Task<bool> ValidSlugAsync(string? title, int? blogPostId)
+        {
+            try
+            {
+                string? newSlug = StringHelper.BlogPostSlug(title);
 
-				if (blogPostId == null || blogPostId == 0)
-				{
-					//Creating BlogPost
-					return !await _context.BlogPost.AnyAsync(b => b.Slug == newSlug);
-				}
-				else
-				{
-					//Editing BlogPost
-					BlogPost? blogPost = await _context.BlogPost.AsNoTracking().FirstOrDefaultAsync(b => b.Id == blogPostId);
+                if (blogPostId == null || blogPostId == 0)
+                {
+                    //Creating BlogPost
+                    return !await _context.BlogPost.AnyAsync(b => b.Slug == newSlug);
+                }
+                else
+                {
+                    //Editing BlogPost
+                    BlogPost? blogPost = await _context.BlogPost.AsNoTracking().FirstOrDefaultAsync(b => b.Id == blogPostId);
 
-					string? oldSlug = blogPost?.Slug;
+                    string? oldSlug = blogPost?.Slug;
 
-					if (!string.Equals(oldSlug, newSlug))
-					{
-						return !await _context.BlogPost.AnyAsync(b => b.Id != blogPost!.Id && b.Slug == newSlug);
-					}
-				}
-				return true;
-			}
-			catch (Exception)
-			{
+                    if (!string.Equals(oldSlug, newSlug))
+                    {
+                        return !await _context.BlogPost.AnyAsync(b => b.Id != blogPost!.Id && b.Slug == newSlug);
+                    }
+                }
+                return true;
+            }
+            catch (Exception)
+            {
 
-				throw;
-			}
-			throw new NotImplementedException();
-		}
+                throw;
+            }
+            throw new NotImplementedException();
+        }
 
-		IEnumerable<BlogPost> IBlogService.SearchBlogPosts(string? searchString)
+        IEnumerable<BlogPost> IBlogService.SearchBlogPosts(string? searchString)
         {
             throw new NotImplementedException();
         }
 
-		public async Task<List<Tag>> GetTagsAsync()
-		{
-			List<Tag> tags = await _context.Tags.ToListAsync();
+        public async Task<List<Tag>> GetTagsAsync()
+        {
+            List<Tag> tags = await _context.Tags.ToListAsync();
 
-			return tags;
-		}
-	}
+            return tags;
+        }
+
+        public async Task<bool> UserLikedBlogAsync(int blogPostId, string blogUserId)
+        {
+            try
+            {
+                return await _context.BlogLikes.AnyAsync(bl => bl.BlogPostId == blogPostId && bl.IsLiked == true && bl.BlogUserId == blogUserId);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<BlogPost>> GetFavoriteBlogPostsAsync(string? blogUserId)
+        {
+            try
+            {
+                List<BlogPost> blogPosts = new();
+               if (!string.IsNullOrEmpty(blogUserId))
+                {
+                    BlogUser? blogUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == blogUserId);
+                    if (blogUser != null)
+                    {
+                        List<int> blogPostIds = _context.BlogLikes.Where(bl => bl.BlogUserId == blogUserId && bl.IsLiked == true).Select(b => b.BlogPostId).ToList();
+                       blogPosts = await _context.BlogPost.Where(b => b.Likes.Any(l => l.BlogUserId == blogUserId && l.IsLiked == true) &&
+                                                                                    b.IsPublished == true &&
+                                                                                    b.IsDeleted == false)
+                                                            .Include(b => b.Likes)
+                                                            .Include(b => b.Comments)
+                                                            .Include(b => b.Category)
+                                                            .Include(b => b.Tags)
+                                                            .OrderByDescending(b => b.CreatedDate)
+                                                            .ToListAsync();
+                    }
+                }
+                return blogPosts;
+            }
+           catch (Exception)
+            {
+   
+              throw;
+            }
+        }
+    }
 }
