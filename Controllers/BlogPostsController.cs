@@ -248,7 +248,6 @@ namespace crucibleBlog.Controllers
 		public async Task<IActionResult> LikeBlogPost(int blogPostId, string blogUserId)
 		{
 			//check if user has already liked this blog
-			//1. get the user
 			BlogUser? blogUser = await _context.Users.Include(u => u.BlogLikes).FirstOrDefaultAsync(u => u.Id == blogUserId);
 			bool result = false;
 			BlogLike? blogLike = new();

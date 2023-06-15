@@ -85,28 +85,28 @@ namespace crucibleBlog.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<BlogPost>> GetPopularBlogPostsAsync(int? count)
-        {
-            try
-            {
-                IEnumerable<BlogPost> blogPosts = await _context.BlogPost
-                                                                .Where(b => b.IsDeleted == false && b.IsPublished == true)
-                                                                .Include(b => b.Category)
-                                                                .Include(b => b.Comments)
-                                                                    .ThenInclude(c => c.Author)
-                                                                .Include(b => b.Tags)
-                                                                .ToListAsync();
+		public async Task<IEnumerable<BlogPost>> GetPopularBlogPostsAsync(int? count)
+		{
+			try
+			{
+				IEnumerable<BlogPost> blogPosts = await _context.BlogPost
+																.Where(b => b.IsDeleted == false && b.IsPublished == true)
+																.Include(b => b.Category)
+																.Include(b => b.Comments)
+																	.ThenInclude(c => c.Author)
+																.Include(b => b.Tags)
+																.ToListAsync();
 
-                return blogPosts.OrderByDescending(b => b.Comments.Count).Take(count!.Value);
-            }
-            catch (Exception)
-            {
+				return blogPosts.OrderByDescending(b => b.Comments.Count).Take(count ?? blogPosts.Count());
+			}
+			catch (Exception)
+			{
 
-                throw;
-            }
-        }
+				throw;
+			}
+		}
 
-        public Task<IEnumerable<BlogPost>> GetRecentBlogPostAsync()
+		public Task<IEnumerable<BlogPost>> GetRecentBlogPostAsync()
         {
             throw new NotImplementedException();
         }
