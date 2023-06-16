@@ -13,50 +13,52 @@ namespace crucibleBlog.Services
 
 		public EmailService(IOptions<EmailSettings> emailSettings)
 		{
-			_emailSettings = emailSettings.Value;
+			_emailSettings = emailSettings.Value; //dependency injection; slightly diff from other injections with other services
 		}
 
 		public async Task SendEmailAsync(string email, string subject, string htmlMessage)
 		{
 			try
 			{
-				var emailAddress = _emailSettings.EmailAddress ?? Environment.GetEnvironmentVariable("EmailAddress");
-				var emailPassword = _emailSettings.EmailPassword ?? Environment.GetEnvironmentVariable("EmailPassword");
-				var emailHost = _emailSettings.EmailHost ?? Environment.GetEnvironmentVariable("EmailHost");
-				var emailPort = _emailSettings.EmailPort != 0 ? _emailSettings.EmailPort : int.Parse(Environment.GetEnvironmentVariable("EmailPort")!);
-
+				var emailSender = _emailSettings.EmailAddress ?? Environment.GetEnvironmentVariable("EmailAddress");
 				MimeMessage newEmail = new MimeMessage();
-
-				newEmail.Sender = MailboxAddress.Parse(emailAddress);
-
-				foreach (string address in email.Split(";"))
+				newEmail.Sender = MailboxAddress.Parse(emailSender);
 				{
-					newEmail.To.Add(MailboxAddress.Parse(address));
+
+					foreach (var emailAddress in email.Split(";"))
+					{
+						newEmail.To.Add(MailboxAddress.Parse(emailAddress));
+					}
+
+					newEmail.Subject = subject;
+
+					BodyBuilder emailBody = new BodyBuilder(); //creat email using body builder
+					emailBody.HtmlBody = htmlMessage; //using html to create body of email
+
+					newEmail.Body = emailBody.ToMessageBody();
+
+					using SmtpClient smtpClient = new SmtpClient();
+
+					try
+					{
+						var host = _emailSettings.EmailHost ?? Environment.GetEnvironmentVariable("EmailHost");
+						var port = _emailSettings.EmailPort != 0 ? _emailSettings.EmailPort : int.Parse(Environment.GetEnvironmentVariable("EmailPort")!);
+						var password = _emailSettings.EmailPassword ?? Environment.GetEnvironmentVariable("EmailPassword");
+
+						//these 3 lines send out an email
+						await smtpClient.ConnectAsync(host, port, SecureSocketOptions.StartTls);
+						await smtpClient.AuthenticateAsync(emailSender, password);
+
+						await smtpClient.SendAsync(newEmail);
+						await smtpClient.DisconnectAsync(true);
+					}
+					catch (Exception ex)
+					{
+						var error = ex.Message;
+						throw;
+					}
+
 				}
-
-				newEmail.Subject = subject;
-
-				BodyBuilder emailBody = new BodyBuilder();
-				emailBody.HtmlBody = htmlMessage;
-
-				newEmail.Body = emailBody.ToMessageBody();
-
-				using SmtpClient smtpClient = new SmtpClient();
-
-				try
-				{
-					await smtpClient.ConnectAsync(emailHost, emailPort, SecureSocketOptions.StartTls);
-					await smtpClient.AuthenticateAsync(emailAddress, emailPassword);
-					await smtpClient.SendAsync(newEmail);
-
-					await smtpClient.DisconnectAsync(true);
-				}
-				catch (Exception ex)
-				{
-					var error = ex.Message;
-					throw;
-				}
-
 			}
 			catch (Exception)
 			{
