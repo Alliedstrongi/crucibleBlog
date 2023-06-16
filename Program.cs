@@ -37,6 +37,7 @@ builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 var app = builder.Build();
+app.UseCors("DefaultPolicy");
 
 var scope = app.Services.CreateScope();
 await DataUtility.ManageDataAsync(scope.ServiceProvider);

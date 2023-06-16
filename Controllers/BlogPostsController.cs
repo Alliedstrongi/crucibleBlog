@@ -16,7 +16,7 @@ using X.PagedList;
 
 namespace crucibleBlog.Controllers
 {
-	//[Authorize(Roles = "Admin")]
+	[Authorize(Roles = "Admin")]
 	public class BlogPostsController : Controller
 	{
 		private readonly ApplicationDbContext _context;
