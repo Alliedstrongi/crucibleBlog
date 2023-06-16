@@ -11,93 +11,81 @@ namespace crucibleBlog.Services
     public class BlogService : IBlogService
     {
 
-        private readonly ApplicationDbContext _context;
+		private readonly ApplicationDbContext _context;
+
+		public BlogService(ApplicationDbContext context)
+		{
+			_context = context;
+
+		}
 
 
-        public BlogService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+		public Task AddTagsToBlogPostAsync(IEnumerable<int>? tagIds, int? blogPostId)
+		{
+			throw new NotImplementedException();
+		}
 
-        public async Task AddTagsToBlogPostAsync(string tagNames, int? blogPostId)
-        {
-            try
-            {
-                BlogPost? blogPost = await _context.BlogPost.FirstOrDefaultAsync(b => b.Id == blogPostId);
-                if (blogPost == null)
-                {
-                    return;
-                }
-
-                List<string> tags = tagNames.Split(',').ToList();
-
-                foreach (string? tagName in tags)
-                {
-                    if (string.IsNullOrWhiteSpace(tagName)) continue;
-
-                    Tag? tag = await _context.Tags.FirstOrDefaultAsync(t => t.Name!.Trim().ToLower() == tagName.Trim().ToLower());
-
-                    if (tag == null)
-                    {
-                        tag = new Tag()
-                        {
-                            Name = tagName.Trim(),
-                        };
-
-                        _context.Tags.Add(tag);
-                    }
-                    blogPost.Tags.Add(tag);
-
-                }
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public Task AddTagsToBlogPostAsync(IEnumerable<int>? tagIds, int? blogPostId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<IEnumerable<Category>> GetCategoriesAsync()
-        {
-            try
-            {
-                IEnumerable<Category> categories = new List<Category>();
-
-
-                categories = await _context.Categories.ToListAsync();
-                return categories;
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
-
-        public Task<IEnumerable<BlogPost>> GetPopularBlogPostsAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-		public async Task<IEnumerable<BlogPost>> GetPopularBlogPostsAsync(int? count)
+		public async Task AddTagsToBlogPostAsync(string tagNames, int? blogPostId)
 		{
 			try
 			{
-				IEnumerable<BlogPost> blogPosts = await _context.BlogPost
-																.Where(b => b.IsDeleted == false && b.IsPublished == true)
-																.Include(b => b.Category)
-																.Include(b => b.Comments)
-																	.ThenInclude(c => c.Author)
-																.Include(b => b.Tags)
-																.ToListAsync();
+				BlogPost? blogPost = await _context.BlogPosts.FirstOrDefaultAsync(b => b.Id == blogPostId);
+				if (blogPost == null) //if blogpost doesnt exist, dont bother doing any more work
+				{
+					return; //break is similar but specifically for loops; return is for a method
+				}
 
-				return blogPosts.OrderByDescending(b => b.Comments.Count).Take(count ?? blogPosts.Count());
+				//string of tag names and split it into more strings
+				// tagNames = "C#", ".Net", "Crucible"
+				// tags = ["C#", ".Net", "Crucible"]
+				List<string> tags = tagNames.Split(',').DistinctBy(s => s.Trim()).ToList(); //returns array without commas; distantby allows us to ensure there are no duplicate tags
+
+				// foreach loop through the tags
+				foreach (string? tagName in tags)
+				{
+					if (string.IsNullOrWhiteSpace(tagName)) continue; //continue goes to next item in loop
+
+					// check to see if we already have tag in db
+					// normalize tag name
+					Tag? tag = await _context.Tags.FirstOrDefaultAsync(b => b.Name!.Trim().ToLower() == tagName.Trim().ToLower());
+
+					// if no tag in db, create a new one
+					if (tag == null)
+					{
+						tag = new Tag()
+						{
+							Name = tagName.Trim(),
+						};
+
+						_context.Tags.Add(tag);
+					}
+					// either way, add the tag to the blog post
+					blogPost.Tags.Add(tag);
+				}
+				// save to the db
+				await _context.SaveChangesAsync();
+
+			}
+			catch (Exception) //handle exceptions as they arise
+			{
+
+				throw;
+			}
+		}
+
+		public async Task RemoveAllBlogPostTagsAsync(int? blogPostId)
+		{
+			try
+			{
+				BlogPost? blogPost = await _context.BlogPosts
+													.Include(c => c.Tags)
+													.FirstOrDefaultAsync(c => c.Id == blogPostId);
+				if (blogPost == null) return;
+
+				blogPost!.Tags.Clear();
+
+				//_context.Update(blogPost); //notifies entity fw that we made changes to model but doesnt yet save
+				await _context.SaveChangesAsync();
 			}
 			catch (Exception)
 			{
@@ -106,170 +94,239 @@ namespace crucibleBlog.Services
 			}
 		}
 
-		public Task<IEnumerable<BlogPost>> GetRecentBlogPostAsync()
-        {
-            throw new NotImplementedException();
-        }
+		public async Task<IEnumerable<Category>> GetCategoriesAsync()
+		{
+			try
+			{
+				IEnumerable<Category> categories = await _context.Categories.ToListAsync();
+				return categories;
+			}
+			catch (Exception)
+			{
 
-        public Task<IEnumerable<BlogPost>> GetRecentBlogPostAsync(int? count)
-        {
-            throw new NotImplementedException();
-        }
+				throw;
+			}
+		}
 
-        public Task<bool> IsTagOnBlogPostAsync(int? tagId, int? blogPostId)
-        {
-            throw new NotImplementedException();
-        }
+		public async Task<IEnumerable<BlogPost>> GetPopularBlogPostsAsync()
+		{
+			try
+			{
+				IEnumerable<BlogPost> blogPosts = await _context.BlogPosts
+															.Where(b => b.IsDeleted == false && b.IsPublished == true)
+															.Include(b => b.Category)
+															.Include(b => b.Comments)
+																.ThenInclude(c => c.Author)
+															.Include(b => b.Tags)
+															.ToListAsync();
 
-        public async Task RemoveAllBlogPostTagsAsync(int? blogPostId)
-        {
-            try
-            {
-                BlogPost? blogPost = await _context.BlogPost.Include(b => b.Tags).FirstOrDefaultAsync(b => b.Id == blogPostId);
+				return blogPosts.OrderByDescending(b => b.Comments.Count);
+			}
+			catch (Exception)
+			{
 
-                if (blogPost == null) return;
+				throw;
+			}
+		}
 
-                blogPost.Tags.Clear();
+		public async Task<IEnumerable<BlogPost>> GetPopularBlogPostsAsync(int? count)
+		{
+			try
+			{
+				IEnumerable<BlogPost> blogPosts = await _context.BlogPosts
+															.Where(b => b.IsDeleted == false && b.IsPublished == true)
+															.Include(b => b.Category)
+															.Include(b => b.Comments)
+																.ThenInclude(c => c.Author)
+															.Include(b => b.Tags)
+															.ToListAsync();
 
-                _context.Update(blogPost);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
+				return blogPosts.OrderByDescending(b => b.Comments.Count).Take(count!.Value);
+			}
+			catch (Exception)
+			{
 
-                throw;
-            }
-        }
+				throw;
+			}
+		}
 
-        public IEnumerable<BlogPost> SearchBlogPosts(string? searchString)
-        {
-            try
-            {
-                IEnumerable<BlogPost> blogPosts = new List<BlogPost>();
+		public async Task<IEnumerable<BlogPost>> GetRecentBlogPostsAsync()
+		{
+			try
+			{
+				IEnumerable<BlogPost> blogPosts = await _context.BlogPosts
+															.Where(b => b.IsDeleted == false && b.IsPublished == true)
+															.Include(b => b.Category)
+															.Include(b => b.Comments)
+																.ThenInclude(c => c.Author)
+															.Include(b => b.Tags)
+															.ToListAsync();
 
-                if (string.IsNullOrEmpty(searchString))
-                {
-                    return blogPosts;
-                }
-                else
-                {
-                    searchString = searchString.Trim().ToLower();
+				return blogPosts.OrderByDescending(b => b.CreatedDate);
+			}
+			catch (Exception)
+			{
 
-                    blogPosts = _context.BlogPost.Where(b => b.Title!.ToLower().Contains(searchString) ||
-                                                        b.Abstract!.ToLower().Contains(searchString) ||
-                                                        b.Content!.ToLower().Contains(searchString) ||
-                                                        b.Category!.Name!.ToLower().Contains(searchString) ||
-                                                        b.Comments!.Any(c => c.Body!.ToLower().Contains(searchString) ||
-                                                                            c.Author!.FirstName.ToLower().Contains(searchString) ||
-                                                                            c.Author!.LastName.ToLower().Contains(searchString)) ||
-                                                        b.Tags.Any(t => t.Name!.ToLower().Contains(searchString)))
-                                                 .Include(b => b.Comments)
-                                                    .ThenInclude(c => c.Author)
-                                                 .Include(b => b.Category)
-                                                 .Include(b => b.Tags)
-                                                 .Where(b => b.IsDeleted == false && b.IsPublished == true)
-                                                 .AsNoTracking()
-                                                 .OrderByDescending(b => b.CreatedDate)
-                                                 .AsEnumerable();
+				throw;
+			}
+		}
+
+		public async Task<IEnumerable<BlogPost>> GetRecentBlogPostsAsync(int? count)
+		{
+			try
+			{
+				IEnumerable<BlogPost> blogPosts = await _context.BlogPosts
+															.Where(b => b.IsDeleted == false && b.IsPublished == true)
+															.Include(b => b.Category)
+															.Include(b => b.Comments)
+																.ThenInclude(c => c.Author)
+															.Include(b => b.Tags)
+															.ToListAsync();
+
+				return blogPosts.OrderByDescending(b => b.CreatedDate).Take(count!.Value);
+			}
+			catch (Exception)
+			{
+
+				throw;
+			}
+		}
+
+		public Task<bool> IsTagOnBlogPostAsync(int? tagId, int? blogPostId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IEnumerable<BlogPost> SearchBlogPosts(string? searchString)
+		{
+			try
+			{
+				//Intermediate variable
+				IEnumerable<BlogPost> blogPosts = new List<BlogPost>(); //doing this because cannot instantiate an Ienumerable; list can be instantiated instead
+
+				if (string.IsNullOrEmpty(searchString))
+				{
+					return blogPosts; //if null or empty, return empty list of blogs
+				}
+				else
+				{
+					//normalize search text (best practice)
+					searchString = searchString.Trim().ToLower();
+
+					//load blogPosts from data from the db
+					//where clause can find multiple queries as opposed to Find() or Firstordefault which only looks for 1 item in db
+					blogPosts = _context.BlogPosts
+												.Where(b => b.Title!.ToLower().Contains(searchString) ||
+														b.Abstract!.ToLower().Contains(searchString) ||
+														b.Content!.ToLower().Contains(searchString) ||
+														b.Category!.Name!.ToLower().Contains(searchString) ||
+														b.Comments.Any(c => c.Body!.ToLower().Contains(searchString) || //new predicate delgate because Comments has its own list of items
+																	c.Author!.FirstName!.ToLower().Contains(searchString) ||
+																	c.Author!.LastName!.ToLower().Contains(searchString)) ||
+														b.Tags.Any(t => t.Name!.ToLower().Contains(searchString)))
+												.Include(b => b.Comments)
+													.ThenInclude(c => c.Author)
+												.Include(b => b.Category)
+												.Include(b => b.Tags)
+												.Where(b => b.IsDeleted == false && b.IsPublished == true)
+												.AsNoTracking() //takes snapchat of db as it is
+												.OrderByDescending(b => b.CreatedDate)
+												.AsEnumerable();
 
 
-                    return blogPosts;
-                }
-            }
-            catch (Exception)
-            {
+					return blogPosts;
+				}
+			}
+			catch (Exception)
+			{
 
-                throw;
-            }
-        }
+				throw;
+			}
+		}
 
-        public async Task<bool> ValidSlugAsync(string? title, int? blogPostId)
-        {
-            try
-            {
-                string? newSlug = StringHelper.BlogPostSlug(title);
+		public async Task<bool> ValidSlugAsync(string? title, int blogPostId)
+		{
+			try
+			{
 
-                if (blogPostId == null || blogPostId == 0)
-                {
-                    //Creating BlogPost
-                    return !await _context.BlogPost.AnyAsync(b => b.Slug == newSlug);
-                }
-                else
-                {
-                    //Editing BlogPost
-                    BlogPost? blogPost = await _context.BlogPost.AsNoTracking().FirstOrDefaultAsync(b => b.Id == blogPostId);
+				string? newSlug = StringHelper.BlogPostSlug(title); //because StringHelper is static, do not need to instantiate StringHelper, can use dot notation as is without instantiation "static is the blueprint and the house"
 
-                    string? oldSlug = blogPost?.Slug;
+				if (blogPostId == null || blogPostId == 0)
+				{
+					//Creating BlogPost
+					return !await _context.BlogPosts.AnyAsync(b => b.Slug == newSlug); //check if any slug in db is == to slug that i just created
+				}
+				else
+				{
+					//Editing BlogPost
+					BlogPost? blogPost = await _context.BlogPosts.AsNoTracking().FirstOrDefaultAsync(b => b.Id == blogPostId); //Asnotracking: keep track of data but dont let entity framework know what I am doing
+					string? oldSlug = blogPost?.Slug; //hold that info above here
 
-                    if (!string.Equals(oldSlug, newSlug))
-                    {
-                        return !await _context.BlogPost.AnyAsync(b => b.Id != blogPost!.Id && b.Slug == newSlug);
-                    }
-                }
-                return true;
-            }
-            catch (Exception)
-            {
+					if (!string.Equals(oldSlug, newSlug)) //compare oldSlug to newSlug
+					{
+						return await _context.BlogPosts.AnyAsync(b => b.Id != blogPost!.Id && b.Slug == newSlug); //check all other blogposts for this particular slug
+					}
 
-                throw;
-            }
-            throw new NotImplementedException();
-        }
+				}
 
-        IEnumerable<BlogPost> IBlogService.SearchBlogPosts(string? searchString)
-        {
-            throw new NotImplementedException();
-        }
+				return true;
+			}
+			catch (Exception)
+			{
 
-        public async Task<List<Tag>> GetTagsAsync()
-        {
-            List<Tag> tags = await _context.Tags.ToListAsync();
+				throw;
+			}
+		}
 
-            return tags;
-        }
+		public async Task<List<Tag>> GetTagsAsync()
+		{
 
-        public async Task<bool> UserLikedBlogAsync(int blogPostId, string blogUserId)
-        {
-            try
-            {
-                return await _context.BlogLikes.AnyAsync(bl => bl.BlogPostId == blogPostId && bl.IsLiked == true && bl.BlogUserId == blogUserId);
-            }
-            catch (Exception)
-            {
+			return await _context.Tags.ToListAsync();
+		}
 
-                throw;
-            }
-        }
+		public async Task<bool> UserLikedBlogAsync(int blogPostId, string blogUserId)
+		{
+			try
+			{
+				return await _context.BlogLikes
+									 .AnyAsync(bl => bl.BlogPostId == blogPostId && bl.IsLiked == true && bl.BlogUserId == blogUserId);
+			}
+			catch (Exception)
+			{
 
-        public async Task<IEnumerable<BlogPost>> GetFavoriteBlogPostsAsync(string? blogUserId)
-        {
-            try
-            {
-                List<BlogPost> blogPosts = new();
-               if (!string.IsNullOrEmpty(blogUserId))
-                {
-                    BlogUser? blogUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == blogUserId);
-                    if (blogUser != null)
-                    {
-                        List<int> blogPostIds = _context.BlogLikes.Where(bl => bl.BlogUserId == blogUserId && bl.IsLiked == true).Select(b => b.BlogPostId).ToList();
-                       blogPosts = await _context.BlogPost.Where(b => b.Likes.Any(l => l.BlogUserId == blogUserId && l.IsLiked == true) &&
-                                                                                    b.IsPublished == true &&
-                                                                                    b.IsDeleted == false)
-                                                            .Include(b => b.Likes)
-                                                            .Include(b => b.Comments)
-                                                            .Include(b => b.Category)
-                                                            .Include(b => b.Tags)
-                                                            .OrderByDescending(b => b.CreatedDate)
-                                                            .ToListAsync();
-                    }
-                }
-                return blogPosts;
-            }
-           catch (Exception)
-            {
-   
-              throw;
-            }
-        }
-    }
+				throw;
+			}
+		}
+
+		public async Task<IEnumerable<BlogPost>> GetFavoriteBlogPostsAsync(string? blogUserId)
+		{
+			try
+			{
+				List<BlogPost> blogPosts = new();
+				if (!string.IsNullOrEmpty(blogUserId))
+				{
+					BlogUser? blogUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == blogUserId);
+					if (blogUser != null)
+					{
+						//List<int> blogPostIds = _context.BlogLikes.Where(bl => bl.BlogUserId == blogUserId && bl.IsLiked == true).Select(b => b.BlogPostId).ToList();
+						blogPosts = await _context.BlogPosts.Where(b => b.Likes.Any(l => l.BlogUserId == blogUserId && l.IsLiked == true) &&
+																					b.IsPublished == true &&
+																					b.IsDeleted == false)
+															.Include(b => b.Likes)
+															.Include(b => b.Comments)
+															.Include(b => b.Category)
+															.Include(b => b.Tags)
+															.OrderByDescending(b => b.CreatedDate)
+															.ToListAsync();
+					}
+				}
+				return blogPosts;
+			}
+			catch (Exception)
+			{
+
+				throw;
+			}
+		}
+	}
 }

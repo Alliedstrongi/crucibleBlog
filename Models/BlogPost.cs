@@ -16,7 +16,7 @@ namespace crucibleBlog.Models
 
         [Required]
         public string? Content { get; set; }
-
+         
         [Required]
         [Display(Name = "Created Date")]
         [DataType(DataType.Date)]
